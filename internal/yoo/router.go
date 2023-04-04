@@ -4,12 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	mw "phos.cc/yoo/internal/pkg/middleware"
 
 	_ "phos.cc/yoo/docs"
 	"phos.cc/yoo/internal/pkg/core"
 	"phos.cc/yoo/internal/pkg/errno"
-	"phos.cc/yoo/internal/yoo/controller/v1/user"
+	"phos.cc/yoo/internal/yoo/controller/v1/category_tag"
+	"phos.cc/yoo/internal/yoo/controller/v1/menu"
+	"phos.cc/yoo/internal/yoo/controller/v1/resource"
 	"phos.cc/yoo/internal/yoo/store"
 )
 
@@ -26,19 +27,33 @@ func installRouters(g *gin.Engine) error {
 	url := ginSwagger.URL("/swagger/doc.json") // The url pointing to API definition
 	g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
-	uc := user.New(store.S)
-
 	// 创建 v1 路由分组
 	v1 := g.Group("/v1")
 	{
-		v1.POST("/login", uc.Login)
 
-		// 创建 users 路由分组
-		userv1 := v1.Group("/users")
+		// 创建 resources 路由分组
+		rc := resource.New(store.S)
+		resourcev1 := v1.Group("/resources")
 		{
-			userv1.POST("", uc.Create)
-			userv1.Use(mw.Auth())
-			userv1.PATCH("/:email/change-password", uc.ChangePassword)
+			resourcev1.PATCH("/:id", rc.Update)
+			resourcev1.GET("/:id", rc.Get)
+			resourcev1.GET("", rc.List)
+		}
+
+		mc := menu.New(store.S)
+		menuv1 := v1.Group("/menus")
+		{
+			menuv1.POST("", mc.Create)
+			menuv1.PATCH("/:id", mc.Update)
+			menuv1.GET("/tree", mc.Tree)
+			menuv1.GET("/:id", mc.Get)
+			menuv1.DELETE("/:id", mc.Delete)
+		}
+
+		ctc := category_tag.New(store.S)
+		category_tagv1 := v1.Group("/category_tag")
+		{
+			category_tagv1.GET("/all", ctc.All)
 		}
 
 	}

@@ -100,9 +100,9 @@ func run() error {
 		return err
 	}
 
-	httpsrv := &http.Server{Addr: ":8080", Handler: r}
+	httpsrv := &http.Server{Addr: ":8081", Handler: r}
 
-	log.Infow("Start to listening the incoming requests on http address", "addr", viper.GetString("addr"))
+	log.Infow("Start to listening the incoming requests on http address", "addr", ":8081")
 
 	go func() {
 

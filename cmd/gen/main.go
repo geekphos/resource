@@ -25,8 +25,8 @@ func main() {
 
 	g.UseDB(db)
 
-	g.GenerateModelAs("users", "UserM")
-	g.GenerateModelAs("templates", "TemplateM")
+	g.GenerateModelAs("resources", "ResourceM", gen.FieldType("tags", "datatypes.JSON"))
+	g.GenerateModelAs("menus", "MenuM", gen.FieldType("resource_id", "*int32"), gen.FieldType("parent_id", "*int32"))
 
 	g.Execute()
 }

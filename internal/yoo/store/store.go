@@ -1,8 +1,9 @@
 package store
 
 import (
-	"gorm.io/gorm"
 	"sync"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -11,14 +12,16 @@ var (
 )
 
 type IStore interface {
-	Users() UserStore
+	Resources() ResourceStore
+	Menus() MenuStore
+	CategoryTags() CategoryTagStore
 }
 
 type database struct {
 	db *gorm.DB
 }
 
-var _IStore = (*database)(nil)
+var _ IStore = (*database)(nil)
 
 // NewStore returns a new store.
 func NewStore(db *gorm.DB) *database {
@@ -28,6 +31,14 @@ func NewStore(db *gorm.DB) *database {
 	return S
 }
 
-func (ds *database) Users() UserStore {
-	return newUsers(ds.db)
+func (ds *database) Resources() ResourceStore {
+	return newResources(ds.db)
+}
+
+func (ds *database) Menus() MenuStore {
+	return newMenus(ds.db)
+}
+
+func (ds *database) CategoryTags() CategoryTagStore {
+	return newCategoryTags(ds.db)
 }
