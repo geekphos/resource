@@ -45,3 +45,18 @@ type UpdateResourceRequest struct {
 	Category *string        `json:"category"`
 	Tags     datatypes.JSON `json:"tags"`
 }
+
+type ListUsedResourceRequest struct {
+	Name   string   `json:"name" form:"tag"`
+	Tags   []string `json:"tags" form:"tag"`
+	Letter string   `json:"letter" form:"letter"`
+}
+
+type ListUsedResourceResponse struct {
+	ID          int32     `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Badge       string    `json:"badge"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}

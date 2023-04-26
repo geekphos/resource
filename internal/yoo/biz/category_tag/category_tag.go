@@ -8,7 +8,9 @@ import (
 )
 
 type CategoryTagBiz interface {
-	All(ctx context.Context) ([]*v1.AllCategoryTagResponse, error)
+	Tree(ctx context.Context) ([]*v1.AllCategoryTagResponse, error)
+	Categories(ctx context.Context) ([]string, error)
+	Tags(ctx context.Context) ([]string, error)
 }
 
 type categoryTagBiz struct {
@@ -21,6 +23,14 @@ func New(ds store.IStore) *categoryTagBiz {
 	return &categoryTagBiz{ds: ds}
 }
 
-func (b *categoryTagBiz) All(ctx context.Context) ([]*v1.AllCategoryTagResponse, error) {
-	return b.ds.CategoryTags().All(ctx)
+func (b *categoryTagBiz) Tree(ctx context.Context) ([]*v1.AllCategoryTagResponse, error) {
+	return b.ds.CategoryTags().Tree(ctx)
+}
+
+func (b *categoryTagBiz) Categories(ctx context.Context) ([]string, error) {
+	return b.ds.CategoryTags().Categories(ctx)
+}
+
+func (b *categoryTagBiz) Tags(ctx context.Context) ([]string, error) {
+	return b.ds.CategoryTags().Tags(ctx)
 }

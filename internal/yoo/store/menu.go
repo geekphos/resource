@@ -45,6 +45,9 @@ func (m *menuStore) All(ctx context.Context, menu *model.MenuM) ([]*model.MenuM,
 	if name != "" {
 		query = query.Where("name like ?", name)
 	}
+	if menu.Letter != "" {
+		query = query.Where("letter = ?", menu.Letter)
+	}
 	err := query.Find(&menus).Error
 	return menus, err
 }

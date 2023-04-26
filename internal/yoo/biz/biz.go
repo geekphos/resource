@@ -11,16 +11,22 @@ type Biz interface {
 	Resources() resource.ResourceBiz
 	Menus() menu.MenuBiz
 	CategoryTags() category_tag.CategoryTagBiz
+	TX() TXBiz
+}
+
+type TXBiz interface {
+	Biz
+	Commit() error
+	Rollback() error
 }
 
 type biz struct {
-	ds store.IStore
+	ds  store.IStore
+	tds store.ITXStore
 }
 
-var _ Biz = (*biz)(nil)
-
 // NewBiz returns a new biz.
-func NewBiz(ds store.IStore) *biz {
+func NewBiz(ds store.IStore) Biz {
 	return &biz{ds: ds}
 }
 
@@ -34,4 +40,16 @@ func (b *biz) Menus() menu.MenuBiz {
 
 func (b *biz) CategoryTags() category_tag.CategoryTagBiz {
 	return category_tag.New(b.ds)
+}
+
+func (b *biz) TX() TXBiz {
+	return &biz{tds: b.ds.TX()}
+}
+
+func (b *biz) Commit() error {
+	return b.tds.Commit()
+}
+
+func (b *biz) Rollback() error {
+	return b.tds.Rollback()
 }

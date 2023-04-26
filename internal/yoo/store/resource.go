@@ -14,6 +14,7 @@ type ResourceStore interface {
 	Update(ctx context.Context, resource *model.ResourceM) error
 	List(ctx context.Context, page, pageSize int, resource *model.ResourceM) ([]*model.ResourceM, int64, error)
 	Get(ctx context.Context, id int32) (*model.ResourceM, error)
+	GetUsedResource(ctx context.Context, ids []int32, name string, tags []string) ([]*model.ResourceM, error)
 }
 
 type resourceStore struct {
@@ -73,4 +74,26 @@ func (s *resourceStore) Get(ctx context.Context, id int32) (*model.ResourceM, er
 	var resource model.ResourceM
 	err := s.db.WithContext(ctx).First(&resource, id).Error
 	return &resource, err
+}
+
+func (s *resourceStore) GetUsedResource(ctx context.Context, ids []int32, name string, tags []string) ([]*model.ResourceM, error) {
+	var resources []*model.ResourceM
+	query := s.db.WithContext(ctx).Model(&model.ResourceM{})
+
+	if len(ids) > 0 {
+		query = query.Where("id in ?", ids)
+	}
+
+	if name != "" {
+		query = query.Where("name LIKE ?", "%"+name+"%")
+	}
+
+	if len(tags) > 0 {
+		for _, tag := range tags {
+			query = query.Where(datatypes.JSONArrayQuery("tags").Contains(tag))
+		}
+	}
+
+	err := query.Find(&resources).Error
+	return resources, err
 }

@@ -47,5 +47,8 @@ func (ctrl *MenuController) Tree(c *gin.Context) {
 		return
 	}
 
-	core.WriteResponse(c, nil, resp)
+	core.WriteResponse(c, nil, gin.H{
+		"data": resp,
+		"code": 0,
+	})
 }

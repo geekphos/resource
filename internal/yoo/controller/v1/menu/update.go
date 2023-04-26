@@ -39,3 +39,23 @@ func (ctrl *MenuController) Update(c *gin.Context) {
 
 	core.WriteResponse(c, nil, nil)
 }
+
+func (ctrl *MenuController) Updates(c *gin.Context) {
+	var rl []*v1.UpdateMenuRequest
+
+	if err := c.ShouldBindJSON(&rl); err != nil {
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(veldt.Translate(errs)), nil)
+		} else {
+			core.WriteResponse(c, errno.ErrBind, nil)
+		}
+		return
+	}
+
+	if err := ctrl.b.Menus().Updates(c, rl); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, nil)
+}

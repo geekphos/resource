@@ -2,6 +2,7 @@ package resource
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -29,7 +30,11 @@ func (ctrl *ResourceController) List(c *gin.Context) {
 		return
 	}
 
-	core.WriteResponse(c, nil, gin.H{"data": list, "total": total})
+	core.WriteResponse(c, nil, gin.H{"data": gin.H{
+		"content": list,
+		"total":   total,
+	},
+		"code": 0})
 }
 
 func (ctrl *ResourceController) Get(c *gin.Context) {
@@ -41,11 +46,49 @@ func (ctrl *ResourceController) Get(c *gin.Context) {
 		return
 	}
 
-	resource, err := ctrl.b.Resources().Get(c, int32(id))
+	resp, err := ctrl.b.Resources().Get(c, int32(id))
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 		return
 	}
 
-	core.WriteResponse(c, nil, resource)
+	core.WriteResponse(c, nil, gin.H{
+		"data": resp,
+		"code": 0,
+	})
+}
+
+func (ctrl *ResourceController) Used(c *gin.Context) {
+	var r v1.ListUsedResourceRequest
+
+	var tags []string
+
+	tagQuery := c.Query("tags")
+	if tagQuery != "" {
+		tags = strings.Split(tagQuery, ",")
+	}
+
+	r.Tags = tags
+
+	if err := c.ShouldBindQuery(&r); err != nil {
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(veldt.Translate(errs)), nil)
+		} else {
+			core.WriteResponse(c, errno.ErrBind, nil)
+		}
+		return
+	}
+
+	list, letters, err := ctrl.b.Resources().Used(c, &r)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, gin.H{
+		"data": gin.H{
+			"resources": list,
+			"letters":   letters,
+		},
+		"code": 0})
 }

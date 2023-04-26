@@ -15,11 +15,11 @@ const TableNameResourceM = "resources"
 // ResourceM mapped from table <resources>
 type ResourceM struct {
 	ID        int32          `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Name      string         `gorm:"column:name;not null" json:"name"`   // 项目名
-	Label     string         `gorm:"column:label;not null" json:"label"` // 中文说明，一般为项目 description
-	Badge     string         `gorm:"column:badge;not null" json:"badge"` // 应用图标
-	Category  string         `gorm:"column:category" json:"category"`    // 分类名称
-	Tags      datatypes.JSON `gorm:"column:tags" json:"tags"`            // 标签列表
+	Name      string         `gorm:"column:name;not null" json:"name"`                       // 项目名
+	Label     string         `gorm:"column:label;not null" json:"label"`                     // 中文说明，一般为项目 description
+	Badge     string         `gorm:"column:badge;not null;default:default.png" json:"badge"` // 应用图标
+	Category  string         `gorm:"column:category" json:"category"`                        // 分类名称
+	Tags      datatypes.JSON `gorm:"column:tags" json:"tags"`                                // 标签
 	CreatedAt time.Time      `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;not null" json:"updated_at"`
 }

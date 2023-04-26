@@ -2,6 +2,7 @@ package yoo
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -9,12 +10,14 @@ import (
 	"phos.cc/yoo/internal/pkg/core"
 	"phos.cc/yoo/internal/pkg/errno"
 	"phos.cc/yoo/internal/yoo/controller/v1/category_tag"
+	"phos.cc/yoo/internal/yoo/controller/v1/files"
 	"phos.cc/yoo/internal/yoo/controller/v1/menu"
 	"phos.cc/yoo/internal/yoo/controller/v1/resource"
 	"phos.cc/yoo/internal/yoo/store"
 )
 
 func installRouters(g *gin.Engine) error {
+
 	g.NoRoute(func(c *gin.Context) {
 		core.WriteResponse(c, errno.ErrPageNotFound, nil)
 	})
@@ -38,6 +41,7 @@ func installRouters(g *gin.Engine) error {
 			resourcev1.PATCH("/:id", rc.Update)
 			resourcev1.GET("/:id", rc.Get)
 			resourcev1.GET("", rc.List)
+			resourcev1.GET("/used", rc.Used)
 		}
 
 		mc := menu.New(store.S)
@@ -45,6 +49,7 @@ func installRouters(g *gin.Engine) error {
 		{
 			menuv1.POST("", mc.Create)
 			menuv1.PATCH("/:id", mc.Update)
+			menuv1.PATCH("/updates", mc.Updates)
 			menuv1.GET("/tree", mc.Tree)
 			menuv1.GET("/:id", mc.Get)
 			menuv1.DELETE("/:id", mc.Delete)
@@ -53,7 +58,18 @@ func installRouters(g *gin.Engine) error {
 		ctc := category_tag.New(store.S)
 		category_tagv1 := v1.Group("/category_tag")
 		{
-			category_tagv1.GET("/all", ctc.All)
+			category_tagv1.GET("/tree", ctc.Tree)
+			category_tagv1.GET("/categories", ctc.Categories)
+			category_tagv1.GET("/tags", ctc.Tags)
+		}
+
+		fc := files.New()
+		filev1 := v1.Group("/files")
+
+		{
+			filev1.POST("/upload", fc.Upload)
+			assets := viper.GetString("assets-path")
+			filev1.Static("", assets)
 		}
 
 	}
