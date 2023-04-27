@@ -1,7 +1,7 @@
 package biz
 
 import (
-	"phos.cc/yoo/internal/yoo/biz/category_tag"
+	"phos.cc/yoo/internal/yoo/biz/category"
 	"phos.cc/yoo/internal/yoo/biz/menu"
 	"phos.cc/yoo/internal/yoo/biz/resource"
 	"phos.cc/yoo/internal/yoo/store"
@@ -10,7 +10,7 @@ import (
 type Biz interface {
 	Resources() resource.ResourceBiz
 	Menus() menu.MenuBiz
-	CategoryTags() category_tag.CategoryTagBiz
+	Categories() category.CategoryBiz
 	TX() TXBiz
 }
 
@@ -38,8 +38,8 @@ func (b *biz) Menus() menu.MenuBiz {
 	return menu.New(b.ds)
 }
 
-func (b *biz) CategoryTags() category_tag.CategoryTagBiz {
-	return category_tag.New(b.ds)
+func (b *biz) Categories() category.CategoryBiz {
+	return category.New(b.ds)
 }
 
 func (b *biz) TX() TXBiz {

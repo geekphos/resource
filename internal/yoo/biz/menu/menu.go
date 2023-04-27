@@ -2,6 +2,9 @@ package menu
 
 import (
 	"context"
+	"fmt"
+	"github.com/samber/lo"
+	"gorm.io/datatypes"
 	"regexp"
 	"sort"
 	"strings"
@@ -22,6 +25,8 @@ type MenuBiz interface {
 	Get(ctx context.Context, id int32) (*v1.GetMenuResponse, error)
 	Tree(ctx context.Context, r *v1.ListMenuRequest) ([]*v1.ListMenuResponse, error)
 	Delete(ctx context.Context, id int32) error
+	GetMenuPath(ctx context.Context, name string) (string, error)
+	GetLeaveMenus(ctx context.Context, r *v1.GetLeaveMenuRequest) ([]map[string][]*v1.GetLeaveMenuResponse, []string, error)
 }
 
 type menuBiz struct {
@@ -175,6 +180,33 @@ func (b *menuBiz) Delete(ctx context.Context, id int32) error {
 	return b.ds.Menus().Delete(ctx, id)
 }
 
+func (b *menuBiz) GetMenuPath(ctx context.Context, name string) (string, error) {
+
+	var menus []*model.MenuM
+
+	menuM, err := b.ds.Menus().GetByName(ctx, name)
+	if err != nil {
+		return "", errno.ErrMenuNotFound
+	}
+
+	menus = append(menus, menuM)
+
+	for menuM.ParentID != nil {
+		menuM, err = b.ds.Menus().Get(ctx, *menuM.ParentID)
+		if err != nil {
+			return "", errno.ErrMenuNotFound
+		}
+		menus = append(menus, menuM)
+	}
+
+	var menuPath string
+	for i := len(menus) - 1; i >= 0; i-- {
+		menuPath += menus[i].Href
+	}
+
+	return menuPath, nil
+}
+
 func getAlphaLetter(name string) string {
 	pyList := pinyin.Pinyin(name, pyArgs)
 
@@ -184,4 +216,66 @@ func getAlphaLetter(name string) string {
 	}
 
 	return ""
+}
+func (b *menuBiz) GetLeaveMenus(ctx context.Context, r *v1.GetLeaveMenuRequest) ([]map[string][]*v1.GetLeaveMenuResponse, []string, error) {
+	var menuM = &model.MenuM{}
+	_ = copier.Copy(menuM, r)
+
+	if r.Categories != nil {
+		menuM.Categories = datatypes.JSON(fmt.Sprintf(`[%s]`, strings.Join(r.Categories, ",")))
+	}
+
+	ms, err := b.ds.Menus().GetLeaveMenus(ctx)
+	if err != nil {
+		return nil, nil, errno.InternalServerError
+	}
+
+	// letter map
+	lm := make(map[string]struct{})
+
+	for _, m := range ms {
+		if m.Letter != "" {
+			lm[m.Letter] = struct{}{}
+		}
+	}
+
+	letters := lo.MapToSlice(lm, func(key string, _ struct{}) string {
+		return key
+	})
+
+	// sort letters
+	sort.Strings(letters)
+
+	// get menu by condition
+	ms, err = b.ds.Menus().GetLeaveMenusWithCond(ctx, menuM)
+
+	if err != nil {
+		return nil, nil, errno.InternalServerError
+	}
+
+	var menus []*v1.GetLeaveMenuResponse
+	for _, m := range ms {
+		menuResp := &v1.GetLeaveMenuResponse{}
+		_ = copier.Copy(menuResp, m)
+		menus = append(menus, menuResp)
+	}
+
+	var menuMap = make(map[string][]*v1.GetLeaveMenuResponse)
+
+	for _, m := range menus {
+		letter := m.Letter
+		menuMap[letter] = append(menuMap[letter], m)
+	}
+
+	var resp []map[string][]*v1.GetLeaveMenuResponse
+
+	for _, letter := range letters {
+		if len(menuMap[letter]) != 0 {
+			resp = append(resp, map[string][]*v1.GetLeaveMenuResponse{
+				letter: menuMap[letter],
+			})
+		}
+	}
+
+	return resp, letters, nil
 }

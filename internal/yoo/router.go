@@ -9,7 +9,7 @@ import (
 	_ "phos.cc/yoo/docs"
 	"phos.cc/yoo/internal/pkg/core"
 	"phos.cc/yoo/internal/pkg/errno"
-	"phos.cc/yoo/internal/yoo/controller/v1/category_tag"
+	"phos.cc/yoo/internal/yoo/controller/v1/category"
 	"phos.cc/yoo/internal/yoo/controller/v1/files"
 	"phos.cc/yoo/internal/yoo/controller/v1/menu"
 	"phos.cc/yoo/internal/yoo/controller/v1/resource"
@@ -41,7 +41,7 @@ func installRouters(g *gin.Engine) error {
 			resourcev1.PATCH("/:id", rc.Update)
 			resourcev1.GET("/:id", rc.Get)
 			resourcev1.GET("", rc.List)
-			resourcev1.GET("/used", rc.Used)
+			resourcev1.GET("/all", rc.All)
 		}
 
 		mc := menu.New(store.S)
@@ -51,16 +51,10 @@ func installRouters(g *gin.Engine) error {
 			menuv1.PATCH("/:id", mc.Update)
 			menuv1.PATCH("/updates", mc.Updates)
 			menuv1.GET("/tree", mc.Tree)
+			menuv1.GET("/path/:name", mc.GetMenuPath)
 			menuv1.GET("/:id", mc.Get)
 			menuv1.DELETE("/:id", mc.Delete)
-		}
-
-		ctc := category_tag.New(store.S)
-		category_tagv1 := v1.Group("/category_tag")
-		{
-			category_tagv1.GET("/tree", ctc.Tree)
-			category_tagv1.GET("/categories", ctc.Categories)
-			category_tagv1.GET("/tags", ctc.Tags)
+			menuv1.GET("/leaves", mc.GetLeaveMenus)
 		}
 
 		fc := files.New()
@@ -70,6 +64,14 @@ func installRouters(g *gin.Engine) error {
 			filev1.POST("/upload", fc.Upload)
 			assets := viper.GetString("assets-path")
 			filev1.Static("", assets)
+		}
+
+		cc := category.New(store.S)
+		categoryv1 := v1.Group("/categories")
+		{
+			categoryv1.GET("/all", cc.All)
+			categoryv1.POST("", cc.Create)
+			categoryv1.PATCH("/:id", cc.Update)
 		}
 
 	}

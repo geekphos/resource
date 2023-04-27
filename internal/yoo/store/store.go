@@ -14,7 +14,7 @@ var (
 type IStore interface {
 	Resources() ResourceStore
 	Menus() MenuStore
-	CategoryTags() CategoryTagStore
+	Categories() CategoryStore
 	TX() ITXStore
 }
 
@@ -44,8 +44,8 @@ func (ds *database) Menus() MenuStore {
 	return newMenus(ds.db)
 }
 
-func (ds *database) CategoryTags() CategoryTagStore {
-	return newCategoryTags(ds.db)
+func (ds *database) Categories() CategoryStore {
+	return newCategories(ds.db)
 }
 
 func (ds *database) TX() ITXStore {

@@ -6,23 +6,27 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/datatypes"
 )
 
 const TableNameMenuM = "menus"
 
 // MenuM mapped from table <menus>
 type MenuM struct {
-	ID         int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Name       string    `gorm:"column:name;not null" json:"name"`                     // 菜单名称
-	Letter     string    `gorm:"column:letter" json:"letter"`                          // 菜单名称首字母
-	Icon       string    `gorm:"column:icon;not null;default:default.png" json:"icon"` // 图标
-	MenuType   int32     `gorm:"column:menu_type;not null;default:1" json:"menu_type"` // 1 目录, 2 页面, 3 外链
-	ResourceID *int32    `gorm:"column:resource_id" json:"resource_id"`                // 资源 id
-	Href       string    `gorm:"column:href" json:"href"`                              // 路径或者外链
-	ParentID   *int32    `gorm:"column:parent_id" json:"parent_id"`                    // 父级菜单 id, 若为根目录, 则为空
-	Number     int32     `gorm:"column:number;not null" json:"number"`                 // 菜单顺序编号
-	CreatedAt  time.Time `gorm:"column:created_at;not null" json:"created_at"`
-	UpdatedAt  time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
+	ID          int32          `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	Name        string         `gorm:"column:name;not null" json:"name"`                     // 菜单名称
+	Icon        string         `gorm:"column:icon;not null;default:default.png" json:"icon"` // 图标
+	Letter      string         `gorm:"column:letter;not null" json:"letter"`                 // 中文首字母
+	MenuType    int32          `gorm:"column:menu_type;not null;default:1" json:"menu_type"` // 1 目录, 2 页面, 3 外链
+	ResourceID  *int32         `gorm:"column:resource_id" json:"resource_id"`                // 资源 id
+	Href        string         `gorm:"column:href" json:"href"`                              // 路径或者外链
+	ParentID    *int32         `gorm:"column:parent_id" json:"parent_id"`                    // 父级菜单 id, 若为根目录, 则为空
+	Number      int32          `gorm:"column:number;not null" json:"number"`                 // 菜单顺序编号
+	Categories  datatypes.JSON `gorm:"column:categories" json:"categories"`                  // 分类 id 列表
+	Description string         `gorm:"column:description;not null" json:"description"`       // 描述
+	CreatedAt   time.Time      `gorm:"column:created_at;not null" json:"created_at"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at;not null" json:"updated_at"`
 }
 
 // TableName MenuM's table name

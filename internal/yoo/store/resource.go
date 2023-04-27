@@ -2,9 +2,6 @@ package store
 
 import (
 	"context"
-	"encoding/json"
-
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
 	"phos.cc/yoo/internal/pkg/model"
@@ -13,8 +10,8 @@ import (
 type ResourceStore interface {
 	Update(ctx context.Context, resource *model.ResourceM) error
 	List(ctx context.Context, page, pageSize int, resource *model.ResourceM) ([]*model.ResourceM, int64, error)
+	All(ctx context.Context) ([]*model.ResourceM, error)
 	Get(ctx context.Context, id int32) (*model.ResourceM, error)
-	GetUsedResource(ctx context.Context, ids []int32, name string, tags []string) ([]*model.ResourceM, error)
 }
 
 type resourceStore struct {
@@ -38,25 +35,8 @@ func (s *resourceStore) List(ctx context.Context, page, pageSize int, resource *
 	)
 
 	query := s.db.WithContext(ctx).Model(&model.ResourceM{})
-	if resource.Name != "" {
-		query = query.Where("name LIKE ?", "%"+resource.Name+"%")
-	}
-	if resource.Label != "" {
-		query = query.Where("label LIKE ?", "%"+resource.Label+"%")
-	}
-
-	if resource.Category != "" {
-		query = query.Where("category = ?", resource.Category)
-	}
-
-	if resource.Tags != nil {
-		var tags []string
-		if err := json.Unmarshal(resource.Tags, &tags); err != nil {
-			return nil, 0, err
-		}
-		for _, tag := range tags {
-			query = query.Where(datatypes.JSONArrayQuery("tags").Contains(tag))
-		}
+	if resource.Description != "" {
+		query = query.Where("description LIKE ?", "%"+resource.Description+"%")
 	}
 
 	if err := query.Count(&count).Error; err != nil {
@@ -76,24 +56,8 @@ func (s *resourceStore) Get(ctx context.Context, id int32) (*model.ResourceM, er
 	return &resource, err
 }
 
-func (s *resourceStore) GetUsedResource(ctx context.Context, ids []int32, name string, tags []string) ([]*model.ResourceM, error) {
+func (s *resourceStore) All(ctx context.Context) ([]*model.ResourceM, error) {
 	var resources []*model.ResourceM
-	query := s.db.WithContext(ctx).Model(&model.ResourceM{})
-
-	if len(ids) > 0 {
-		query = query.Where("id in ?", ids)
-	}
-
-	if name != "" {
-		query = query.Where("name LIKE ?", "%"+name+"%")
-	}
-
-	if len(tags) > 0 {
-		for _, tag := range tags {
-			query = query.Where(datatypes.JSONArrayQuery("tags").Contains(tag))
-		}
-	}
-
-	err := query.Find(&resources).Error
+	err := s.db.WithContext(ctx).Find(&resources).Error
 	return resources, err
 }

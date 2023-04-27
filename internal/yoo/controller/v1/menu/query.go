@@ -52,3 +52,44 @@ func (ctrl *MenuController) Tree(c *gin.Context) {
 		"code": 0,
 	})
 }
+
+func (ctrl *MenuController) GetMenuPath(c *gin.Context) {
+	name := c.Param("name")
+
+	resp, err := ctrl.b.Menus().GetMenuPath(c, name)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, resp)
+}
+
+func (ctrl *MenuController) GetLeaveMenus(c *gin.Context) {
+	var r v1.GetLeaveMenuRequest
+
+	r.Categories = c.QueryArray("categories")
+
+	if err := c.ShouldBindQuery(&r); err != nil {
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(veldt.Translate(errs)), nil)
+		} else {
+			core.WriteResponse(c, errno.ErrBind, nil)
+		}
+		return
+	}
+
+	resp, letters, err := ctrl.b.Menus().GetLeaveMenus(c, &r)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, gin.H{
+		"data": gin.H{
+			"menus":   resp,
+			"letters": letters,
+		},
+		"code": 0,
+	})
+}
