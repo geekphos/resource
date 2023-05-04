@@ -50,9 +50,9 @@ type ListMenuResponse struct {
 }
 
 type GetMenuRequest struct {
-	Name     string `json:"name"`
-	Letter   string `json:"letter"`
-	ParentID int32  `json:"parent_id"`
+	Name     string `json:"name" form:"name"`
+	Letter   string `json:"letter" form:"letter"`
+	ParentID int32  `json:"parent_id" form:"parent_id"`
 }
 
 type GetMenuResponse struct {
@@ -86,9 +86,9 @@ type GetMenuBranchResponse struct {
 }
 
 type GetLeaveMenuRequest struct {
-	Name       string   `json:"name"`
-	Letter     string   `json:"letter"`
-	Categories []string `json:"categories"`
+	Name       string   `json:"name" form:"name"`
+	Letter     string   `json:"letter" form:"letter"`
+	Categories []string `json:"categories" form:"categories"`
 }
 
 type GetLeaveMenuResponse struct {

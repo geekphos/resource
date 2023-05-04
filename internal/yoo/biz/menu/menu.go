@@ -3,11 +3,12 @@ package menu
 import (
 	"context"
 	"fmt"
-	"github.com/samber/lo"
-	"gorm.io/datatypes"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/samber/lo"
+	"gorm.io/datatypes"
 
 	"github.com/jinzhu/copier"
 	"github.com/mozillazg/go-pinyin"
@@ -27,6 +28,7 @@ type MenuBiz interface {
 	Delete(ctx context.Context, id int32) error
 	GetMenuPath(ctx context.Context, name string) (string, error)
 	GetLeaveMenus(ctx context.Context, r *v1.GetLeaveMenuRequest) ([]map[string][]*v1.GetLeaveMenuResponse, []string, error)
+	GetMenuByIds(ctx context.Context, ids []int32) ([]*v1.GetMenuResponse, error)
 }
 
 type menuBiz struct {
@@ -278,4 +280,20 @@ func (b *menuBiz) GetLeaveMenus(ctx context.Context, r *v1.GetLeaveMenuRequest) 
 	}
 
 	return resp, letters, nil
+}
+
+func (b *menuBiz) GetMenuByIds(ctx context.Context, ids []int32) ([]*v1.GetMenuResponse, error) {
+	menuMs, err := b.ds.Menus().GetMenuByIds(ctx, ids)
+	if err != nil {
+		return nil, errno.InternalServerError
+	}
+	var resp []*v1.GetMenuResponse
+
+	for _, m := range menuMs {
+		menuResp := &v1.GetMenuResponse{}
+		_ = copier.Copy(menuResp, m)
+		resp = append(resp, menuResp)
+	}
+
+	return resp, nil
 }

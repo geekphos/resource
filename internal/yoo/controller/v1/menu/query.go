@@ -2,6 +2,7 @@ package menu
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -92,4 +93,27 @@ func (ctrl *MenuController) GetLeaveMenus(c *gin.Context) {
 		},
 		"code": 0,
 	})
+}
+
+func (ctrl *MenuController) GetMenuByIds(c *gin.Context) {
+	ids := c.Param("ids")
+	idStrList := strings.Split(ids, ",")
+
+	idList := make([]int32, 0, len(idStrList))
+	for _, idStr := range idStrList {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			core.WriteResponse(c, errno.ErrInvalidParameter, nil)
+			return
+		}
+		idList = append(idList, int32(id))
+	}
+
+	resp, err := ctrl.b.Menus().GetMenuByIds(c, idList)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+	}
+
+	core.WriteResponse(c, nil, resp)
+
 }

@@ -55,6 +55,7 @@ func installRouters(g *gin.Engine) error {
 			menuv1.GET("/:id", mc.Get)
 			menuv1.DELETE("/:id", mc.Delete)
 			menuv1.GET("/leaves", mc.GetLeaveMenus)
+			menuv1.GET("/list/:ids", mc.GetMenuByIds)
 		}
 
 		fc := files.New()

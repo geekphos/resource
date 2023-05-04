@@ -19,6 +19,7 @@ type MenuStore interface {
 	Delete(ctx context.Context, id int32) error
 	GetLeaveMenus(ctx context.Context) ([]*model.MenuM, error)
 	GetLeaveMenusWithCond(ctx context.Context, menu *model.MenuM) ([]*model.MenuM, error)
+	GetMenuByIds(ctx context.Context, ids []int32) ([]*model.MenuM, error)
 }
 
 type menuStore struct {
@@ -103,5 +104,11 @@ func (m *menuStore) GetLeaveMenusWithCond(ctx context.Context, menu *model.MenuM
 	}
 
 	err := query.Find(&menus).Error
+	return menus, err
+}
+
+func (m *menuStore) GetMenuByIds(ctx context.Context, ids []int32) ([]*model.MenuM, error) {
+	var menus []*model.MenuM
+	err := m.db.WithContext(ctx).Where("id in ?", ids).Find(&menus).Error
 	return menus, err
 }
