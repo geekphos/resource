@@ -10,7 +10,7 @@ import (
 type ResourceStore interface {
 	Update(ctx context.Context, resource *model.ResourceM) error
 	List(ctx context.Context, page, pageSize int, resource *model.ResourceM) ([]*model.ResourceM, int64, error)
-	All(ctx context.Context) ([]*model.ResourceM, error)
+	All(ctx context.Context, m *model.ResourceM) ([]*model.ResourceM, error)
 	Get(ctx context.Context, id int32) (*model.ResourceM, error)
 }
 
@@ -56,8 +56,15 @@ func (s *resourceStore) Get(ctx context.Context, id int32) (*model.ResourceM, er
 	return &resource, err
 }
 
-func (s *resourceStore) All(ctx context.Context) ([]*model.ResourceM, error) {
+func (s *resourceStore) All(ctx context.Context, m *model.ResourceM) ([]*model.ResourceM, error) {
 	var resources []*model.ResourceM
-	err := s.db.WithContext(ctx).Find(&resources).Error
+
+	query := s.db.WithContext(ctx).Model(&model.ResourceM{})
+
+	if m.Description != "" {
+		query = query.Where("description LIKE ?", "%"+m.Description+"%")
+	}
+
+	err := query.Find(&resources).Error
 	return resources, err
 }

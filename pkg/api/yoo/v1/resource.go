@@ -20,6 +20,10 @@ type ListResourceRequest struct {
 	Description string `json:"description" form:"description"`
 }
 
+type AllResourceRequest struct {
+	Description string `json:"description" form:"description"`
+}
+
 type ListResourceResponse struct {
 	ID          int32     `json:"id"`
 	Name        string    `json:"name"`

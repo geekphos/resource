@@ -57,7 +57,19 @@ func (ctrl *ResourceController) Get(c *gin.Context) {
 }
 
 func (ctrl *ResourceController) All(c *gin.Context) {
-	list, err := ctrl.b.Resources().All(c)
+
+	var r v1.AllResourceRequest
+
+	if err := c.ShouldBindQuery(&r); err != nil {
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(veldt.Translate(errs)), nil)
+		} else {
+			core.WriteResponse(c, errno.ErrBind, nil)
+		}
+		return
+	}
+
+	list, err := ctrl.b.Resources().All(c, &r)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 		return

@@ -6,6 +6,7 @@ import (
 )
 
 func (ctrl *CategoryController) All(c *gin.Context) {
+
 	categories, err := ctrl.b.Categories().All(c)
 	if err != nil {
 		core.WriteResponse(c, err, nil)

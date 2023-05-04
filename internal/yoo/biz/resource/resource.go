@@ -12,7 +12,7 @@ import (
 type ResourceBiz interface {
 	Update(ctx context.Context, r *v1.UpdateResourceRequest) error
 	List(ctx context.Context, r *v1.ListResourceRequest) ([]*v1.ListResourceResponse, int64, error)
-	All(ctx context.Context) ([]*v1.ListResourceResponse, error)
+	All(ctx context.Context, r *v1.AllResourceRequest) ([]*v1.ListResourceResponse, error)
 	Get(ctx context.Context, id int32) (*v1.GetResourceResponse, error)
 }
 
@@ -70,8 +70,11 @@ func (b *resourceBiz) Get(ctx context.Context, id int32) (*v1.GetResourceRespons
 	return resourceR, nil
 }
 
-func (b *resourceBiz) All(ctx context.Context) ([]*v1.ListResourceResponse, error) {
-	resources, err := b.ds.Resources().All(ctx)
+func (b *resourceBiz) All(ctx context.Context, r *v1.AllResourceRequest) ([]*v1.ListResourceResponse, error) {
+	resourceM := &model.ResourceM{}
+	_ = copier.Copy(resourceM, r)
+
+	resources, err := b.ds.Resources().All(ctx, resourceM)
 	if err != nil {
 		return nil, errno.InternalServerError
 	}
