@@ -4,11 +4,32 @@ import (
 	"time"
 )
 
+type CreateResourceRequest struct {
+	Name        string  `json:"name" binding:"required"`
+	Description string  `json:"description" binding:"required"`
+	Badge       *string `json:"badge"`
+	Fake        bool    `json:"fake"`
+	URL         *string `json:"url"`
+}
+
+type CreateResourceResponse struct {
+	ID          int32     `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Badge       string    `json:"badge"`
+	Fake        bool      `json:"fake"`
+	URL         *string   `json:"url"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 type GetResourceResponse struct {
 	ID          int32     `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Badge       string    `json:"badge"`
+	Fake        bool      `json:"fake"`
+	URL         *string   `json:"url"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -29,6 +50,8 @@ type ListResourceResponse struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Badge       string    `json:"badge"`
+	Fake        bool      `json:"fake"`
+	URL         *string   `json:"url"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -38,6 +61,8 @@ type UpdateResourceRequest struct {
 	Name        *string `json:"name"`
 	Description *string `json:"description"`
 	Badge       *string `json:"badge"`
+	Fake        *bool   `json:"fake"`
+	URL         *string `json:"url"`
 }
 
 type ListUsedResourceRequest struct {
@@ -49,6 +74,8 @@ type ListUsedResourceResponse struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Badge       string    `json:"badge"`
+	Fake        bool      `json:"fake"`
+	URL         *string   `json:"url"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

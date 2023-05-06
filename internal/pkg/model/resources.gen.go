@@ -13,9 +13,11 @@ const TableNameResourceM = "resources"
 // ResourceM mapped from table <resources>
 type ResourceM struct {
 	ID          int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Name        string    `gorm:"column:name;not null" json:"name"`                       // 项目名
-	Description string    `gorm:"column:description;not null" json:"description"`         // 中文说明，一般为项目 description
-	Badge       string    `gorm:"column:badge;not null;default:default.png" json:"badge"` // 应用图标
+	Name        string    `gorm:"column:name;not null" json:"name"`               // 项目名
+	Description string    `gorm:"column:description;not null" json:"description"` // 中文说明，一般为项目 description
+	Badge       string    `gorm:"column:badge;not null" json:"badge"`             // 应用图标
+	Fake        bool      `gorm:"column:fake;not null" json:"fake"`               // 应用为无实体应用, 0 不是, 1 是
+	URL         string    `gorm:"column:url" json:"url"`                          // 应用的url
 	CreatedAt   time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }

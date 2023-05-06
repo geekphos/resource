@@ -10,6 +10,7 @@ import (
 )
 
 type ResourceBiz interface {
+	Create(ctx context.Context, r *v1.CreateResourceRequest) error
 	Update(ctx context.Context, r *v1.UpdateResourceRequest) error
 	List(ctx context.Context, r *v1.ListResourceRequest) ([]*v1.ListResourceResponse, int64, error)
 	All(ctx context.Context, r *v1.AllResourceRequest) ([]*v1.ListResourceResponse, error)
@@ -26,12 +27,22 @@ func New(ds store.IStore) *resourceBiz {
 	return &resourceBiz{ds: ds}
 }
 
+func (b *resourceBiz) Create(ctx context.Context, r *v1.CreateResourceRequest) error {
+	var resourceM = &model.ResourceM{}
+	_ = copier.CopyWithOption(resourceM, r, copier.Option{IgnoreEmpty: true})
+
+	if err := b.ds.Resources().Create(ctx, resourceM); err != nil {
+		return errno.InternalServerError
+	}
+	return nil
+}
+
 func (b *resourceBiz) Update(ctx context.Context, r *v1.UpdateResourceRequest) error {
 	resourceM, err := b.ds.Resources().Get(ctx, r.ID)
 	if err != nil {
 		return errno.InternalServerError
 	}
-	_ = copier.Copy(resourceM, r)
+	_ = copier.CopyWithOption(resourceM, r, copier.Option{IgnoreEmpty: true})
 
 	if err := b.ds.Resources().Update(ctx, resourceM); err != nil {
 		return errno.InternalServerError

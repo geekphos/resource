@@ -42,6 +42,7 @@ func installRouters(g *gin.Engine) error {
 			resourcev1.GET("/:id", rc.Get)
 			resourcev1.GET("", rc.List)
 			resourcev1.GET("/all", rc.All)
+			resourcev1.POST("", rc.Create)
 		}
 
 		mc := menu.New(store.S)

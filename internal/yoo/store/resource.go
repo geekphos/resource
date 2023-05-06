@@ -8,6 +8,7 @@ import (
 )
 
 type ResourceStore interface {
+	Create(ctx context.Context, resource *model.ResourceM) error
 	Update(ctx context.Context, resource *model.ResourceM) error
 	List(ctx context.Context, page, pageSize int, resource *model.ResourceM) ([]*model.ResourceM, int64, error)
 	All(ctx context.Context, m *model.ResourceM) ([]*model.ResourceM, error)
@@ -22,6 +23,10 @@ var _ ResourceStore = (*resourceStore)(nil)
 
 func newResources(db *gorm.DB) *resourceStore {
 	return &resourceStore{db: db}
+}
+
+func (s *resourceStore) Create(ctx context.Context, resource *model.ResourceM) error {
+	return s.db.WithContext(ctx).Create(resource).Error
 }
 
 func (s *resourceStore) Update(ctx context.Context, resource *model.ResourceM) error {
